@@ -1,0 +1,25 @@
+<div id="login">
+    <form id="login-form">
+        Username: <input id="login-username" type="text" placeholder="name"></input><br>
+        <input id="play-btn" type="submit" value="Go!"></input>
+    </form>
+</div>
+<div id="game" style="display:none">
+    <canvas id="ctx" width="500" height="500" style="border:1px solid #000000;"></canvas>
+
+    <div id="chat-text" style="width:500px;height:100px;overflow-y:scroll">
+        <div>Type below to chat!</div>
+    </div>
+
+    <form id="chat-form">
+        <input id="chat-input" type="text" style="width:500px"></input>
+    </form>
+</div>
+
+<script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+<script src="/client/resourceLoader.js"></script>
+<script src="/client/init.js"></script>
+<script src="/client/login.js"></script>
+<script src="/client/chat.js"></script>
+<script src="/client/game.js"></script>
+<script src="/client/animation.js"></script>
