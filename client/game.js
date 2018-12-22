@@ -1,5 +1,6 @@
 
 var playerList = {}
+var clientPlayer = null
 
 class Player {
     constructor(initPackage){
@@ -10,6 +11,9 @@ class Player {
         this.rotation = initPackage.rotation
         this.color = initPackage.color;
         this.state = initPackage.state;
+
+        //client only stuff
+        this.animator = new Animator()
         this.onNextUpdate =  null //a one time callback that is executed during 
         //bookkeeping
         playerList[this.id] = this;
@@ -35,9 +39,6 @@ socket.on('newBoard', function(initPackage){
 })
 
 socket.on('update',function(delta){
-            console.log(delta)
-
-
     //delta is {players: [{id,x,y},{id,x,y}], tiles:[{id,x,y},{id,x,y}]}
     for(var i = 0; i < delta.players.length; i++){
         var newInfo = delta.players[i];
@@ -52,8 +53,9 @@ socket.on('update',function(delta){
             //except id
             if(key == "id") {continue;}
             player[key] = newInfo[key]
-            if(key == "state"){
-                //console.log(player[key])
+            if(key == "state" && player !=clientPlayer && player[key] == 1) {
+                //another player is attacking
+                player.onNextUpdate =  player.animator.punch.play()
             }
         }
         // save changes
@@ -66,13 +68,15 @@ function init() {
     requestAnimationFrame(update)
 }
 
-var img = 'player-128' 
 function update(){
     if (playerID == null){
         requestAnimationFrame(update)
         return
     }
-    var rot = Math.atan2( mousePos.y - playerList[playerID].y, mousePos.x-playerList[playerID].x )
+    if (clientPlayer == null){
+        clientPlayer = playerList[playerID]
+    }
+    var rot = Math.atan2( mousePos.y - clientPlayer.y, mousePos.x-clientPlayer.x )
     if (rot != lastRot) 
     {
         socket.emit("newRotation", rot)
@@ -85,12 +89,15 @@ function update(){
 
     for(var i in playerList) {
         var player = playerList[i];
+ 
+        player.animator.animationUpdate();
+
         ctx.save();
         ctx.translate(player.x, player.y);
 
 
         ctx.rotate(player.rotation)
-        ctx.drawImage(resources.get('/client/assets/'+ img +'.svg'),-size/2,-size/2,size*xSize,size)
+        ctx.drawImage(resources.get('/client/assets/'+ player.animator.image +'.svg'),-size/2,-size/2,size*player.animator.xSize,size)
         ctx.beginPath()
         ctx.arc(0,0,5,0,2*Math.PI)
         ctx.fillStyle = player.color;
@@ -107,7 +114,6 @@ function update(){
         ctx.stroke()
         */
     }
-    animation.animationUpdate();
     requestAnimationFrame(update)
 }
 
@@ -116,7 +122,7 @@ function onClick(){
     socket.emit("clientRequestingAttack")
 
     //for now we assume punching
-    animation.punch.play()
+    clientPlayer.animator.punch.play()
 }
 
 socket.on('playerDisconnect', function(data){

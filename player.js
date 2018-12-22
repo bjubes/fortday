@@ -91,7 +91,7 @@ class Player {
             if (player.state == Player.state.free){
                 //Util.broadcast('playerAttacking',player.id)
                 player.state = Player.state.attacking
-                console.log(player.id," attacked")
+                player.stateTimer = player.punchTime
             }
         })
         socket.on('clientMovementKeyChange', function(data) {
@@ -190,7 +190,7 @@ class Player {
 
         if (this.state == Player.state.attacking){
             if (this.stateTimer > 0){
-                stateTimer--
+                this.stateTimer--
             } else {
                 this.state = Player.state.free
             }           
@@ -214,16 +214,21 @@ class Player {
         var pack = {
             id: this.id
         };
-
         var isDirty = false
+        
         for (var d in this.delta){
             if (this.delta[d]){
                 pack[d] = this[d]
                 isDirty = true
             }
         }
+
+        //we have seen all changes, so reset the delta object
         this.delta = {}
+
+        // return the pack only if something has changed
         if (isDirty){
+            console.log(pack)
             return pack
         } else{
             return null
