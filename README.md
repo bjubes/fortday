@@ -1,7 +1,7 @@
-# nodecube
+# Fortday
 A multiplayer game using NodeJS and socket.io for real time interaction.
-Play now at https://nodecube.herokuapp.com
-
+A bad clone of [surviv.io](http://surviv.io/)
+iteration of [nodecube](https://github.com/bjubes/nodecube)
 
 ## Installation
  #### requirements
@@ -18,7 +18,7 @@ now go to http://localhost:2000 in your browser.
 optionally use nodemon for continuous server changes:
 ```
     npm install -g nodemon
-    nodemon main.js
+    npm run dev
 ```
 
 
