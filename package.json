@@ -10,7 +10,7 @@
   },
   "author": "Brian Jubelirer",
   "dependencies": {
-    "express": "^4.14.1",
-    "socket.io": "^1.7.3"
+    "express": "^4.16.4",
+    "socket.io": "^2.2.0"
   }
 }
