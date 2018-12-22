@@ -70,8 +70,11 @@ setInterval(function(){
 	for (i in lobby.playerList)
 	{
 		var player = lobby.playerList[i]
-	 	player.move();
-	 	playerPack.push(player.updatePacket());
+	 	player.tick();
+	 	var updatePacket = player.updatePacket()
+	 	if (updatePacket != null){
+	 		playerPack.push(updatePacket);
+	 	}
 	}
 
 	if (playerPack.length == 0) {

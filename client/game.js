@@ -9,6 +9,8 @@ class Player {
         this.y = initPackage.y;
         this.rotation = initPackage.rotation
         this.color = initPackage.color;
+        this.state = initPackage.state;
+        this.onNextUpdate =  null //a one time callback that is executed during 
         //bookkeeping
         playerList[this.id] = this;
     }
@@ -33,6 +35,9 @@ socket.on('newBoard', function(initPackage){
 })
 
 socket.on('update',function(delta){
+            console.log(delta)
+
+
     //delta is {players: [{id,x,y},{id,x,y}], tiles:[{id,x,y},{id,x,y}]}
     for(var i = 0; i < delta.players.length; i++){
         var newInfo = delta.players[i];
@@ -47,6 +52,9 @@ socket.on('update',function(delta){
             //except id
             if(key == "id") {continue;}
             player[key] = newInfo[key]
+            if(key == "state"){
+                //console.log(player[key])
+            }
         }
         // save changes
         playerList[newInfo.id] = player;

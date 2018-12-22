@@ -3,8 +3,6 @@ var Lobby = require('./lobby.js')
 
 class Player {
 
-    
-
     constructor(id, name, lobby){
         if(name == ""){
             name = id //TODO: generate random names
@@ -16,8 +14,12 @@ class Player {
         this.y = 0;
         this.rotation = 0;
         this._color = Util.randomColor();
-        this.velocity = {'x':0,'y':0} 
+        this.velocity = {'x':0,'y':0}
+
+        //state related vars 
         this._state = Player.state.free
+        this.punchTime = 10;
+        this.stateTimer = 0;
 
         //flags
         this.delta = {} // delta.<attribute> MUST correspond to player.<attribute>, otherwise updatePacket will fail
@@ -42,6 +44,7 @@ class Player {
     set state(val){
         if (Number.isInteger(val) && val < Object.keys(Player.state).length){
             this._state = val
+            this.delta.state = true;
         } else {
             console.log("ERROR - enum assigned to nonexistent value")
         }
@@ -86,7 +89,7 @@ class Player {
 
             //tell everyone else they are are attacking
             if (player.state == Player.state.free){
-                Util.broadcast('playerAttacking',player.id)
+                //Util.broadcast('playerAttacking',player.id)
                 player.state = Player.state.attacking
                 console.log(player.id," attacked")
             }
@@ -150,7 +153,7 @@ class Player {
     updateExistingPlayers(){
         //send existing players my info
         var initPackages = {}
-        initPackages[this.id] = this.updatePacket(true)
+        initPackages[this.id] = this.initPackage()
         Util.broadcast("newPlayer", initPackages);
     }
 
@@ -159,7 +162,7 @@ class Player {
         var initPackages = {}
         for(var i in this.lobby.playerList){
             var player = this.lobby.playerList[i]
-            initPackages[player.id] = player.updatePacket(true)
+            initPackages[player.id] = player.initPackage()
         }
         socket.emit("newPlayer", initPackages)
     }
@@ -172,26 +175,59 @@ class Player {
         return player.name
     }
 
-    move(){
+    move() {
         var speed = Player.speed
         this.x += this.velocity.x * speed
         this.y += this.velocity.y * speed
         this.lobby.onPlayerMoved(this);
+
+        this.delta.x = (this.velocity.x != 0)
+        this.delta.y = (this.velocity.x != 0)
+    }
+
+    tick() {
+        this.move()
+
+        if (this.state == Player.state.attacking){
+            if (this.stateTimer > 0){
+                stateTimer--
+            } else {
+                this.state = Player.state.free
+            }           
+        }
+    }
+    
+    initPackage(){
+        var fullPack = {
+            id: this.id,
+            x: this.x,
+            y: this.y,
+            color: this.color,
+            rotation: this.rotation,
+            state: this.state
+        }
+
+        return fullPack
     }
 
     updatePacket(ignoreDeltas = false) {
         var pack = {
-            id: this.id,
-            x: this.x,
-            y: this.y,
-            rotation: this.rotation
+            id: this.id
         };
+
+        var isDirty = false
         for (var d in this.delta){
-            if (this.delta[d] || ignoreDeltas ){
+            if (this.delta[d]){
                 pack[d] = this[d]
+                isDirty = true
             }
         }
-        return pack
+        this.delta = {}
+        if (isDirty){
+            return pack
+        } else{
+            return null
+        }
     }
 }
 
