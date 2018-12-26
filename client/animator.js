@@ -33,7 +33,6 @@ class Animator {
                 anim.framesRemaining = this.frames;
                 anim.xSize = this.xSize;
                 anim.nextState = this.goto;
-                console.log(anim.image)
             }
         };
     }

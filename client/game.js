@@ -122,7 +122,9 @@ function onClick(){
     socket.emit("clientRequestingAttack")
 
     //for now we assume punching
-    clientPlayer.animator.punch.play()
+    if(clientPlayer.animator.nextState == null){
+        clientPlayer.animator.punch.play()
+    }
 }
 
 socket.on('playerDisconnect', function(data){
