@@ -1,5 +1,6 @@
 var Util = require('./utilities.js')
 var Lobby = require('./lobby.js')
+var Item = require('./shared/item.js')
 
 class Player {
 
@@ -20,6 +21,11 @@ class Player {
         this._state = Player.state.free
         this.punchTime = 10;
         this.stateTimer = 0;
+
+        //inventory
+        this.inventory = {
+            "skin": Item.prefab.skin_0
+        }
 
         //flags
         this.delta = {} // delta.<attribute> MUST correspond to player.<attribute>, otherwise updatePacket will fail
@@ -66,6 +72,8 @@ class Player {
         player.registerInputHandler(socket);
         player.sendNewPlayerInit(socket);
         player.updateExistingPlayers();
+
+        player.lobby.sendNewPlayerItems(socket);
         return player;
     }
 

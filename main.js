@@ -6,6 +6,7 @@ var serv = require('http').Server(app);
 var Player = require('./player.js')
 var Util = require('./utilities.js')
 var Lobby = require('./lobby.js')
+var ItemDrop = require('./shared/itemdrop.js')
 
 //https on heroku
 app.get('*', function(req,res,next) {
@@ -18,6 +19,7 @@ app.get('/',function(req, res) {
 	res.sendFile(__dirname + '/client/index.html');
 });
 app.use('/client',express.static(__dirname + '/client'));
+app.use('/shared',express.static(__dirname + '/shared'));
 
 serv.listen(process.env.PORT || 2000);
 console.log("Server started.");
@@ -25,6 +27,12 @@ console.log("Server started.");
 DEBUG = process.env.DEBUG
 SOCKET_LIST = {}
 var lobby = new Lobby()
+
+/// hardcoding items into lobby
+
+lobby.itemDropList["index"] = new ItemDrop("skin_0",50,50)
+
+///
 
 var io = require('socket.io')(serv,{});
 io.sockets.on('connection', function(socket){

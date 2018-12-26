@@ -15,7 +15,6 @@ class Animator {
             graphic:"player-128",
             xSize:1,
             play: function(){
-                console.log(this)
                 this.image = this.idle.graphic;
                 this.xSize = this.idle.xSize;
                 this.nextState = null;

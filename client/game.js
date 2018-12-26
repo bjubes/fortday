@@ -1,8 +1,10 @@
 
 var playerList = {}
 var clientPlayer = null
+var itemDropList = {}
 
 class Player {
+
     constructor(initPackage){
         this.name = initPackage.name;
         this.id = initPackage.id;
@@ -20,7 +22,6 @@ class Player {
     }
 }
 
-var lastRot = 0;
 
 
 //TODO: make it so game doesnt error if this isnt instanciated before all loops and whatnot
@@ -34,9 +35,14 @@ socket.on('newPlayer', function(initPackages){
     }
 })
 
-socket.on('newBoard', function(initPackage){
-    board = new Board(initPackage)
+socket.on('newItemDrop', function(initPackages){
+    for(var i in initPackages){
+        console.log(initPackages[i])
+        var initPackage = initPackages[i]
+        itemDropList[i] = new ItemDrop(initPackage)
+    }
 })
+
 
 socket.on('update',function(delta){
     //delta is {players: [{id,x,y},{id,x,y}], tiles:[{id,x,y},{id,x,y}]}
@@ -77,10 +83,11 @@ function update(){
         clientPlayer = playerList[playerID]
     }
     var rot = Math.atan2( mousePos.y - clientPlayer.y, mousePos.x-clientPlayer.x )
-    if (rot != lastRot) 
+    if (rot != clientPlayer.rot) 
     {
         socket.emit("newRotation", rot)
         lastRot = rot
+        clientPlayer.rot = rot
     }
     
 
@@ -118,11 +125,10 @@ function update(){
 }
 
 function onClick(){
-    //attack!
     socket.emit("clientRequestingAttack")
 
-    //for now we assume punching
     if(clientPlayer.animator.nextState == null){
+        //we are (from this client's perspective) not already punching or shooting
         clientPlayer.animator.punch.play()
     }
 }
@@ -175,7 +181,6 @@ window.onblur = function(){
     socket.emit('clientMovementKeyChange', keyState);
 };
 
- /////////////// UTILTIES ////////////////////////////
 var mousePos = {};
 
 canvas.addEventListener('mousemove', function(evt) {

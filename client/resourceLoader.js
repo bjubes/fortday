@@ -11,7 +11,6 @@ class ResourceLoader {
         var resourceLoader = this
         if(urlOrArr instanceof Array) {
             urlOrArr.forEach(function(url) {
-                console.log(this)
                 resourceLoader._load(url);
             });
         }

@@ -1,10 +1,13 @@
 var Util = require('./utilities.js')
 
+// list of all lobbies on the server
 var lobbyList = [];
 
 class Lobby {
     constructor(length, width){
         this.playerList = {}
+        this.itemDropList = {} // items that are on the ground, NOT in players inventories
+        
         lobbyList.push(this);
     }
 
@@ -22,6 +25,11 @@ class Lobby {
             }
         }
     return null;
+    }
+
+    sendNewPlayerItems(socket){
+        //they need to know about all of the itemdrops.
+        socket.emit("newItemDrop",this.itemDropList)
     }
 
     onPlayerMoved(player) {
