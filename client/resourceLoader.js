@@ -1,61 +1,63 @@
-(function() {
-    var resourceCache = {};
-    var loading = [];
-    var readyCallbacks = [];
+class ResourceLoader {
+
+    constructor(){
+        this.resourceCache = {}
+        this.loading = [];
+        this.readyCallbacks = [];
+    }
 
     // Load an image url or an array of image urls
-    function load(urlOrArr) {
+    load(urlOrArr) {
+        var resourceLoader = this
         if(urlOrArr instanceof Array) {
             urlOrArr.forEach(function(url) {
-                _load(url);
+                console.log(this)
+                resourceLoader._load(url);
             });
         }
         else {
-            _load(urlOrArr);
+            this._load(urlOrArr);
         }
     }
 
-    function _load(url) {
-        if(resourceCache[url]) {
-            return resourceCache[url];
+    _load(url) {
+        var resourceLoader = this
+        if(this.resourceCache[url]) {
+            return this.resourceCache[url];
         }
         else {
             var img = new Image();
             img.onload = function() {
-                resourceCache[url] = img;
+                resourceLoader.resourceCache[url] = img;
 
-                if(isReady()) {
-                    readyCallbacks.forEach(function(func) { func(); });
+                if(resourceLoader.isReady()) {
+                    resourceLoader.readyCallbacks.forEach(function(func) { func(); });
                 }
             };
-            resourceCache[url] = false;
+            this.resourceCache[url] = false;
             img.src = url;
         }
     }
 
-    function get(url) {
-        return resourceCache[url];
+    get(url) {
+        return this.resourceCache[url];
     }
 
-    function isReady() {
+    isReady() {
         var ready = true;
-        for(var k in resourceCache) {
-            if(resourceCache.hasOwnProperty(k) &&
-               !resourceCache[k]) {
+        for(var k in this.resourceCache) {
+            if(this.resourceCache.hasOwnProperty(k) &&
+               !this.resourceCache[k]) {
                 ready = false;
             }
         }
         return ready;
     }
 
-    function onReady(func) {
-        readyCallbacks.push(func);
+    onReady(func) {
+        this.readyCallbacks.push(func);
     }
+}
 
-    window.resources = { 
-        load: load,
-        get: get,
-        onReady: onReady,
-        isReady: isReady
-    };
-})();
+
+window.resources = new ResourceLoader()
