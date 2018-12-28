@@ -4,6 +4,7 @@
 class ItemDrop {
 	constructor(id,x,y){
 		if (arguments.length == 1) {
+			//unpack initpackage into seperate parameters
 			Object.assign(this, id);
 		} else {
 
@@ -11,6 +12,11 @@ class ItemDrop {
 			this.x = x;
 			this.y =y;
 		}
+	}
+
+	render(ctx){
+		var image = window.itemSpriteDict[this.id]
+	    ctx.drawImage(resources.get('/client/assets/'+ image +'.svg'),this.x,this.y,64,64)
 	}
 }
 

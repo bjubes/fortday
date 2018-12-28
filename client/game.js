@@ -91,8 +91,13 @@ function update(){
     }
     
 
-    //DRAWING
+    //DRAWING - bottom to top
     ctx.clearRect(0,0,500,500);
+
+     for(var i in itemDropList) {
+        var item = itemDropList[i]
+        item.render(ctx)
+    }
 
     for(var i in playerList) {
         var player = playerList[i];
@@ -121,6 +126,7 @@ function update(){
         ctx.stroke()
         */
     }
+
     requestAnimationFrame(update)
 }
 
@@ -140,7 +146,8 @@ socket.on('playerDisconnect', function(data){
 resources.load([
     '/client/assets/player-128.svg',
     '/client/assets/player-punch-left-128.svg',
-    '/client/assets/player-punch-right-128.svg'
+    '/client/assets/player-punch-right-128.svg',
+    '/client/assets/skin-icon-96.svg'
 ]);
 
 resources.onReady(init);
