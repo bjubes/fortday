@@ -16,7 +16,21 @@ class ItemDrop {
 
 	render(ctx){
 		var image = window.itemSpriteDict[this.id]
-	    ctx.drawImage(resources.get('/client/assets/'+ image +'.svg'),this.x,this.y,64,64)
+	    ctx.drawImage(resources.get('/client/assets/'+ image +'.svg'),this.x-24,this.y-24,48,48)
+/*
+	    ctx.beginPath()
+        ctx.arc(this.x,this.y,5,0,2*Math.PI)
+        ctx.fill()
+        ctx.stroke()
+*/
+	}
+
+	getPrefab(){
+		return Item.prefab[this.id]
+	}
+
+	getName(){
+		return this.getPrefab().name
 	}
 }
 

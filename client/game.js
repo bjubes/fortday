@@ -2,6 +2,8 @@
 var playerList = {}
 var clientPlayer = null
 var itemDropList = {}
+var nearestItemDrop = null
+var sqrReachDistance = reachDistance * reachDistance
 
 class Player {
 
@@ -89,7 +91,24 @@ function update(){
         lastRot = rot
         clientPlayer.rot = rot
     }
-    
+
+    //see if a dropItem is close by
+    nearestItemDrop = null
+    var closestDist = sqrReachDistance
+
+
+    for(var i in itemDropList){
+        var item = itemDropList[i]
+
+        var newDist = sqrdist(item,clientPlayer)
+        if (newDist < closestDist) {
+            nearestItemDrop = item
+            closestDist = newDist
+        }
+
+    }
+
+   
 
     //DRAWING - bottom to top
     ctx.clearRect(0,0,500,500);
@@ -127,6 +146,12 @@ function update(){
         */
     }
 
+     if (nearestItemDrop != null){
+        ctx.textAlign = "center"
+        ctx.font = "14px Arial";
+        ctx.fillText(nearestItemDrop.getName(), nearestItemDrop.x,nearestItemDrop.y+32)
+    }
+
     requestAnimationFrame(update)
 }
 
@@ -147,7 +172,7 @@ resources.load([
     '/client/assets/player-128.svg',
     '/client/assets/player-punch-left-128.svg',
     '/client/assets/player-punch-right-128.svg',
-    '/client/assets/skin-icon-96.svg'
+    '/client/assets/skin-icon-64.svg'
 ]);
 
 resources.onReady(init);
@@ -163,6 +188,11 @@ window.addEventListener('keyup',function(e){onKeyUp(e);},true);
 
 function onKeyDown(e){
     onKeyDownOrUp(e,true)
+    var keycode = e.keyCode || e.which
+    if (keycode == 70) {
+        //F key
+        socket.emit("UNIMPLEMENTED - requestPickupDropItem", nearestItemDrop)
+    }
 }
 function onKeyUp(e){
     onKeyDownOrUp(e,false)
@@ -203,3 +233,8 @@ function updateMousePos(evt) {
 }
 
 canvas.addEventListener('click',onClick);
+
+
+function sqrdist(a,b){
+    return (b.x-a.x)*(b.x-a.x) + (b.y-a.y)*(b.y-a.y)
+}
