@@ -58,7 +58,7 @@ class Player {
     }
 
     //static vars
-    static get speed() {return 5}
+    static get speed() {return 3}
     static get reachDistance(){return 75}
     static get state() {
         return {
@@ -90,6 +90,10 @@ class Player {
         socket.on('newRotation', function(rotation){
             player.rotation = rotation
             player.delta.rotation = true
+        })
+
+        socket.on('getItemDropInit',function(){
+            player.lobby.sendNewPlayerItems(socket,false)
         })
 
         socket.on('requestPickupDropItem', function(itemDropID){

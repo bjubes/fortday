@@ -33,12 +33,14 @@ class Lobby {
                 }
             }
         }
-    return null;
+        return null;
     }
 
-    sendNewPlayerItems(socket){
-        //rememer the new players socket
-        this.socketList.push(function(msg,data){socket.emit(msg,data)})
+    sendNewPlayerItems(socket, newPlayer=true){
+        if (newPlayer){
+            // rememer the new players socket
+            this.socketList.push(function(msg,data){socket.emit(msg,data)})
+        }
         //they need to know about all of the itemdrops.
         socket.emit("newItemDrop",this._itemDropList)
     }

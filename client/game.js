@@ -53,6 +53,16 @@ socket.on("deleteItemDrop", function(id){
     delete itemDropList[id]
 })
 
+socket.on('pickupDropItemRejected', function(data){
+    //{trigger: itemDropID, inventory: player.inventory}
+    // should we do something to undo onEquip of what we picked up.
+
+
+    //our itemlist is out of sync, so get a new one
+    itemDropList = {}
+    socket.emit("getItemDropInit")
+})
+
 
 socket.on('update',function(delta){
     //delta is {players: [{id,x,y},{id,x,y}], tiles:[{id,x,y},{id,x,y}]}

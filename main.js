@@ -90,4 +90,4 @@ setInterval(function(){
 		return;
 	}
 	Util.broadcast('update', {players: playerPack});
-}, 1000/25);
+}, 1000/60);
