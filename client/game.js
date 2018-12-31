@@ -16,6 +16,8 @@ class Player {
         this.color = initPackage.color;
         this.state = initPackage.state;
 
+        this.inventory = {} //change later maybe?
+
         //client only stuff
         this.animator = new Animator()
         this.onNextUpdate =  null //a one time callback that is executed during 
@@ -39,10 +41,16 @@ socket.on('newPlayer', function(initPackages){
 
 socket.on('newItemDrop', function(initPackages){
     for(var i in initPackages){
-        console.log(initPackages[i])
         var initPackage = initPackages[i]
         itemDropList[i] = new ItemDrop(initPackage)
+
+        console.log(initPackage)
     }
+})
+
+socket.on("deleteItemDrop", function(id){
+    console.log(id)
+    delete itemDropList[id]
 })
 
 
@@ -103,6 +111,7 @@ function update(){
         var newDist = sqrdist(item,clientPlayer)
         if (newDist < closestDist) {
             nearestItemDrop = item
+            nearestItemDrop.inGameID = i
             closestDist = newDist
         }
 
@@ -189,9 +198,21 @@ window.addEventListener('keyup',function(e){onKeyUp(e);},true);
 function onKeyDown(e){
     onKeyDownOrUp(e,true)
     var keycode = e.keyCode || e.which
-    if (keycode == 70) {
+    if (keycode == 70 && nearestItemDrop != null) {
         //F key
-        socket.emit("UNIMPLEMENTED - requestPickupDropItem", nearestItemDrop)
+        socket.emit("requestPickupDropItem", nearestItemDrop.inGameID)
+        //assume we can legally pick up this item
+
+        delete itemDropList[nearestItemDrop.inGameID]
+        var itemPrefab = nearestItemDrop.getPrefab()
+
+        console.log(itemPrefab)
+
+        //we don't drop our old stuff locally for "creating id reasons"
+
+        clientPlayer.inventory["skin"] = itemPrefab;
+        itemPrefab.onEquip(clientPlayer)
+
     }
 }
 function onKeyUp(e){

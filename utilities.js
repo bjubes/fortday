@@ -14,4 +14,9 @@ Util.generateId = function(){
 	//gen a number between 0 and 9 millon, and convert to alphanumeric
 	return (0|Math.random()*9e6).toString(36)
 }
+
+Util.sqrDist =  function(a,b){
+    return (b.x-a.x)*(b.x-a.x) + (b.y-a.y)*(b.y-a.y)
+}
+
 module.exports = Util

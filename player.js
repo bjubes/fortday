@@ -1,6 +1,7 @@
 var Util = require('./utilities.js')
 var Lobby = require('./lobby.js')
 var Item = require('./shared/item.js')
+var ItemDrop = require('./shared/itemdrop.js')
 
 class Player {
 
@@ -58,6 +59,7 @@ class Player {
 
     //static vars
     static get speed() {return 5}
+    static get reachDistance(){return 75}
     static get state() {
         return {
             'free':0,
@@ -88,6 +90,21 @@ class Player {
         socket.on('newRotation', function(rotation){
             player.rotation = rotation
             player.delta.rotation = true
+        })
+
+        socket.on('requestPickupDropItem', function(itemDropID){
+            console.log(itemDropID)
+            var item = player.lobby.getItemDrop(itemDropID)
+            console.log(item)
+            var sqrDist = Util.sqrDist(player,item)
+
+            if (item == undefined || item == null || sqrDist > Player.reachDistance * Player.reachDistance){
+                //rejected. this item doesnt exist or is too far away.
+                socket.emit('pickupDropItemRejected', {trigger: itemDropID, inventory: player.inventory})
+                return
+            }
+            //we can pick up this item, so do it
+            player.pickupItem(itemDropID)
         })
 
         socket.on('clientRequestingAttack',function(){
@@ -204,7 +221,25 @@ class Player {
             }           
         }
     }
+
+    pickupItem(id){
+        var itemDrop = this.lobby.getItemDrop(id)
+        var item = itemDrop.getPrefab()
+        var spot = item.equipSpot
+        console.log(item)
+        if(this.inventory[spot] != null && this.inventory[spot] != undefined  ){
+            //we already have one of these... drop the old one!
+            this.dropItem(spot)
+        }
+        this.lobby.removeDropItemViaID(id)
+        this.inventory[spot] = item
+    }
     
+    dropItem(spot){
+        var itemDrop = new ItemDrop(this.inventory[spot].id,this.x,this.y)
+        this.lobby.addDropItem(itemDrop)
+    }
+
     initPackage(){
         var fullPack = {
             id: this.id,
@@ -236,7 +271,7 @@ class Player {
 
         // return the pack only if something has changed
         if (isDirty){
-            console.log(pack)
+            //console.log(pack)
             return pack
         } else{
             return null

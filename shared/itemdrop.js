@@ -1,5 +1,11 @@
+isNode = false
+if (typeof window === 'undefined'){
+	itemInNodeJS = require("./item.js")
+	isNode = true
+}
 //the in world version of an item
 //has position and a reference to the prefab version via "id"
+
 
 class ItemDrop {
 	constructor(id,x,y){
@@ -26,8 +32,11 @@ class ItemDrop {
 	}
 
 	getPrefab(){
-		return Item.prefab[this.id]
-	}
+		if (isNode){
+			return itemInNodeJS.prefab[this.id]
+		} else {
+			return Item.prefab[this.id]
+	}	}
 
 	getName(){
 		return this.getPrefab().name

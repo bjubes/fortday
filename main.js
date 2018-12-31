@@ -30,8 +30,8 @@ var lobby = new Lobby()
 
 /// hardcoding items into lobby
 
-lobby.itemDropList["38237"] = new ItemDrop("skin_0",50,50)
-lobby.itemDropList["15334"] = new ItemDrop("skin_1",120,70)
+lobby._itemDropList["38237"] = new ItemDrop("skin_0",50,50)
+lobby._itemDropList["15334"] = new ItemDrop("skin_1",120,70)
 
 ///
 
