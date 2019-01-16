@@ -237,6 +237,7 @@ class Player {
         }
         this.lobby.removeDropItemViaID(id)
         this.inventory[spot] = item
+        item.onEquip(this)
     }
     
     dropItem(spot){
