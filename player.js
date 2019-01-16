@@ -15,7 +15,7 @@ class Player {
         this.x = 0;
         this.y = 0;
         this.rotation = 0;
-        this._color = Util.randomColor();
+        this._color = '#FFCD94' //same color as default skin
         this.velocity = {'x':0,'y':0}
 
         //state related vars 
@@ -104,7 +104,7 @@ class Player {
 
             if (item == undefined || item == null || sqrDist > Player.reachDistance * Player.reachDistance){
                 //rejected. this item doesnt exist or is too far away.
-                socket.emit('pickupDropItemRejected', {trigger: itemDropID, inventory: player.inventory})
+                socket.emit('pickupDropItemRejected', {prefab: item, inventory: player.inventory})
                 return
             }
             //we can pick up this item, so do it

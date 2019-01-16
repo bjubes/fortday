@@ -1,4 +1,3 @@
-
 var playerList = {}
 var clientPlayer = null
 var itemDropList = {}
@@ -16,7 +15,9 @@ class Player {
         this.color = initPackage.color;
         this.state = initPackage.state;
 
-        this.inventory = {} //change later maybe?
+         this.inventory = {
+            "skin": Item.prefab.skin_0
+        }
 
         //client only stuff
         this.animator = new Animator()
@@ -43,24 +44,35 @@ socket.on('newItemDrop', function(initPackages){
     for(var i in initPackages){
         var initPackage = initPackages[i]
         itemDropList[i] = new ItemDrop(initPackage)
-
-        console.log(initPackage)
     }
 })
 
 socket.on("deleteItemDrop", function(id){
-    console.log(id)
     delete itemDropList[id]
 })
 
 socket.on('pickupDropItemRejected', function(data){
-    //{trigger: itemDropID, inventory: player.inventory}
-    // should we do something to undo onEquip of what we picked up.
-
-
-    //our itemlist is out of sync, so get a new one
+   
     itemDropList = {}
     socket.emit("getItemDropInit")
+
+    
+    console.log(data.inventory.skin)
+
+    //our itemlist is out of sync, so get a new one, by using IDs and getting prefab.
+    //hte actual inventory sent by server can't have lambdas or other prefab data sent as well
+
+    for (const [key, incompleteItem] of Object.entries(data.inventory)) {
+            var itemID = incompleteItem.id
+            var item = Item.prefab[itemID]
+            clientPlayer.inventory[item.equipSpot] = item
+    
+
+
+            //because on equip should be tings like changign color or gameplay safe, we will recall them on the old item
+            //even if this is adverse, it only happens on client side.
+            item.onEquip(clientPlayer)
+    }
 })
 
 
@@ -216,11 +228,9 @@ function onKeyDown(e){
         delete itemDropList[nearestItemDrop.inGameID]
         var itemPrefab = nearestItemDrop.getPrefab()
 
-        console.log(itemPrefab)
 
         //we don't drop our old stuff locally for "creating id reasons"
-
-        clientPlayer.inventory["skin"] = itemPrefab;
+        clientPlayer.inventory[itemPrefab.equipSpot] = itemPrefab;
         itemPrefab.onEquip(clientPlayer)
 
     }
