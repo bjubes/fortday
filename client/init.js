@@ -4,6 +4,9 @@ var socket = io();
 let dpi = window.devicePixelRatio;
 let canvas = document.getElementById('ctx');
 let ctx = canvas.getContext('2d');
+canvas.oncontextmenu = function (e) {
+    e.preventDefault();
+};
 
 function fix_dpi() {
 	let style_height = 500
