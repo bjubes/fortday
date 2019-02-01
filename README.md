@@ -26,4 +26,4 @@ optionally use nodemon for continuous server changes:
 Check out [DOCUMENTATION.md](https://github.com/bjubes/nodecube/blob/master/DOCUMENTATION.MD) for a compelete list of socket.io events.
 
 ## Contributing
-Bug reports and pull requests are welcome on GitHub at https://github.com/bjubes/nodecube
+Bug reports and pull requests are welcome on GitHub at https://github.com/bjubes/fortday
