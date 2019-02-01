@@ -18,3 +18,5 @@ function fix_dpi() {
 fix_dpi()
 var size = 64;
 var reachDistance = 75;
+
+let DEBUG_DRAW_PUNCH_COLLIDER = false

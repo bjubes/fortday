@@ -164,6 +164,10 @@ function update(){
         ctx.arc(0,0,5,0,2*Math.PI)
         ctx.fillStyle = player.color;
         ctx.fill()
+        if (DEBUG_DRAW_PUNCH_COLLIDER){
+            ctx.ellipse(35, 0, 20,35, 0, 0, 2 * Math.PI);
+            ctx.fill()
+        }
         ctx.stroke()
         ctx.restore();
 

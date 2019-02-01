@@ -17,6 +17,7 @@ class Player {
         this.rotation = 0;
         this._color = '#FFCD94' //same color as default skin
         this.velocity = {'x':0,'y':0}
+        this.health = 100;
 
         //state related vars 
         this._state = Player.state.free
@@ -85,8 +86,8 @@ class Player {
     }
 
     registerInputHandler(socket) {
-        var player = this; //declared outside of callback lambda so "this" is
-                           // is  a reference to "player" , not "socket"
+        let player = this; // if we use 'this' inside callback it returns 'socket'
+                           // so we cache the player object while its referenced by 'this'
         socket.on('newRotation', function(rotation){
             player.rotation = rotation
             player.delta.rotation = true
@@ -115,10 +116,66 @@ class Player {
             //player hit the fire button
             //for now, assume no weapon...so we punch
 
+            //lets calculate a hitbox.... shit this is gonna be a lot of math...
+            // https://stackoverflow.com/a/2945439/4283285 is gonna be our approach
+            // our goal is to make an ellipse from two points and a distance ('e')
+            
+            //lets start by offsetting 35 units in front of the player.
+            var center = {x:0,y:0}
+            center.x = player.x + 35 * Math.cos(player.rotation)
+            center.y = player.y + 35 * Math.sin(player.rotation)
+
+            //now lets get the two foci by going perpendicular...
+            //get a copy of the center to modify
+            var foci1= {x:0,y:0}
+            var foci2 = {x:0,y:0}
+            foci1.x = center.x + 15 * Math.cos(player.rotation + Math.PI/2)
+            foci1.y = center.y + 15 * Math.sin(player.rotation + Math.PI/2)
+            foci2.x = center.x - 15 * Math.cos(player.rotation + Math.PI/2)
+            foci2.y = center.y - 15 * Math.sin(player.rotation + Math.PI/2)
+
+            //now lets get every player (optimize this list down to players nearby or something...)
+            // and see if they intersect
+            for (var key in player.lobby.playerList){
+                var p = player.lobby.playerList[key]
+
+                //we cant punch ourselves
+                if (p.id == player.id){
+                    continue
+                }
+
+                //find line from foci to circle center
+                var dx = Math.abs(p.x - player.x)
+                var dy = Math.abs(p.y - player.y)
+                if (dx * dx + dy* dy > 36864) {// this is 64 * 3 squared.. 
+                   // you can't punch someone who is more than 3x away from you
+                    continue
+                }
+                //refer to the diagram on stackoverflow to make sense of variable names
+                var ACdx = Math.abs(foci1.x - p.x)
+                var ACdy = Math.abs(foci1.y - p.y)
+                var ac = Math.sqrt(ACdx * ACdx + ACdy *ACdy)
+
+                //for performance.. if this is already out of range, just return now
+                //to save the extra sqrt calculation
+                if (ac > 64 + 40){
+                    continue
+                }
+
+                var BCdx = Math.abs(foci2.x - p.x)
+                var BCdy = Math.abs(foci2.y - p.y)
+                var bc = Math.sqrt(ACdx * ACdx + ACdy *ACdy)
+
+                //the diameter of the player is 64
+                // 40 is the sum of the dist from foci to edge
+                if (ac + bc < 64 + 40){
+                    console.log(player.name +" punched " + p.name)
+                    p.health -= 15; //should not be hardcoded...
+                }
+            }
 
             //tell everyone else they are are attacking
             if (player.state == Player.state.free){
-                //Util.broadcast('playerAttacking',player.id)
                 player.state = Player.state.attacking
                 player.stateTimer = player.punchTime
             }
