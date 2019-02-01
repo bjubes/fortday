@@ -14,6 +14,7 @@ class Player {
         this.rotation = initPackage.rotation
         this.color = initPackage.color;
         this.state = initPackage.state;
+        this.health = initPackage.health;
 
          this.inventory = {
             "skin": Item.prefab.skin_0
@@ -180,8 +181,15 @@ function update(){
         ctx.stroke()
         */
     }
+    ctx.globalAlpha = 0.3
+    ctx.fillStyle = "grey"
+    ctx.fillRect(50,430,400,30)
+    ctx.globalAlpha = 0.7
+    ctx.fillStyle = "red"
+    ctx.fillRect(50, 430, clientPlayer.health * 4, 30)
+    ctx.globalAlpha = 1
 
-     if (nearestItemDrop != null){
+    if (nearestItemDrop != null){
         ctx.textAlign = "center"
         ctx.font = "14px Arial";
         ctx.fillText(nearestItemDrop.getName(), nearestItemDrop.x,nearestItemDrop.y+32)
@@ -231,8 +239,6 @@ function onKeyDown(e){
 
         delete itemDropList[nearestItemDrop.inGameID]
         var itemPrefab = nearestItemDrop.getPrefab()
-
-
         //we don't drop our old stuff locally for "creating id reasons"
         clientPlayer.inventory[itemPrefab.equipSpot] = itemPrefab;
         itemPrefab.onEquip(clientPlayer)

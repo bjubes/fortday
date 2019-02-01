@@ -17,7 +17,7 @@ class Player {
         this.rotation = 0;
         this._color = '#FFCD94' //same color as default skin
         this.velocity = {'x':0,'y':0}
-        this.health = 100;
+        this._health = 100;
 
         //state related vars 
         this._state = Player.state.free
@@ -47,6 +47,11 @@ class Player {
     set color(val){
         this.delta.color = true
         this._color = val
+    }
+    get health(){return this._health}
+    set health(val){
+        this.delta.health = true
+        this._health = val
     }
     get state(){return this._state}
     set state(val){
@@ -309,7 +314,8 @@ class Player {
             y: this.y,
             color: this.color,
             rotation: this.rotation,
-            state: this.state
+            state: this.state,
+            health: this.health
         }
 
         return fullPack
