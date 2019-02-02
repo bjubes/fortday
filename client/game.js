@@ -15,6 +15,7 @@ class Player {
         this.color = initPackage.color;
         this.state = initPackage.state;
         this.health = initPackage.health;
+        this._weapon =  initPackage.weapon;
 
          this.inventory = {
             "skin": Item.prefab.skin_0
@@ -25,6 +26,19 @@ class Player {
         this.onNextUpdate =  null //a one time callback that is executed during 
         //bookkeeping
         playerList[this.id] = this;
+        //initally setup animation, because weapon setter isnt used for construction
+        this.animator.onWeaponChanged(this.weapon)
+    }
+    get weapon(){return this._weapon}
+    set weapon(val){ //for now, val is the ID of the weapon we are holding, not the inventory slot
+        this.animator.onWeaponChanged(val)
+        console.log(val)
+        if(this == clientPlayer){
+            //we are changing weapons
+            //so tell the server
+            socket.emit("changeWeapons", val)
+        }
+        this._weapon = val
     }
 }
 
@@ -91,11 +105,19 @@ socket.on('update',function(delta){
         for(key in newInfo){
             //except id
             if(key == "id") {continue;}
-            player[key] = newInfo[key]
             if(key == "state" && player !=clientPlayer && player[key] == 1) {
                 //another player is attacking
                 player.onNextUpdate =  player.animator.punch.play()
             }
+            if(key == "weapon"){
+                if(player == clientPlayer){
+                    //to stop ininfiite change weapon loop
+                    continue;
+                }
+                player.animator.onWeaponChanged(newInfo[key])
+            }
+            player[key] = newInfo[key]
+
         }
         // save changes
         playerList[newInfo.id] = player;
@@ -203,7 +225,9 @@ function onClick(){
 
     if(clientPlayer.animator.nextState == null){
         //we are (from this client's perspective) not already punching or shooting
-        clientPlayer.animator.punch.play()
+        if (clientPlayer.weapon == null) { //if we have fists out
+            clientPlayer.animator.punch.play()
+        }
     }
 }
 
@@ -215,7 +239,11 @@ resources.load([
     '/client/assets/player-128.svg',
     '/client/assets/player-punch-left-128.svg',
     '/client/assets/player-punch-right-128.svg',
-    '/client/assets/skin-icon-64.svg'
+    '/client/assets/skin-icon-64.svg',
+    '/client/assets/gun-icon-64.svg',
+    '/client/assets/gun-equipped-128.svg'
+
+
 ]);
 
 resources.onReady(init);
@@ -229,6 +257,8 @@ keystatewhitelist = [68,87,65,83]
 window.addEventListener('keydown',function(e){onKeyDown(e);},true);
 window.addEventListener('keyup',function(e){onKeyUp(e);},true);
 
+window.addEventListener('wheel',onScroll)
+
 function onKeyDown(e){
     onKeyDownOrUp(e,true)
     var keycode = e.keyCode || e.which
@@ -241,8 +271,9 @@ function onKeyDown(e){
         var itemPrefab = nearestItemDrop.getPrefab()
         //we don't drop our old stuff locally for "creating id reasons"
         clientPlayer.inventory[itemPrefab.equipSpot] = itemPrefab;
-        itemPrefab.onEquip(clientPlayer)
-
+        if (itemPrefab.onEquip != null){
+            itemPrefab.onEquip(clientPlayer)
+        }
     }
 }
 function onKeyUp(e){
@@ -257,6 +288,15 @@ function onKeyDownOrUp(e,isKeyDown) {
     //this is a key event relevent to the server
     keyState[keycode] = isKeyDown;
     socket.emit('clientMovementKeyChange', keyState);
+}
+
+function onScroll(e){
+    //todo: implement weapons system and mulitple guns
+    if(clientPlayer.weapon == null){
+        clientPlayer.weapon = clientPlayer.inventory.gun.id
+    } else {
+        clientPlayer.weapon = null;
+    }
 }
 
 

@@ -32,6 +32,7 @@ var lobby = new Lobby()
 
 lobby._itemDropList["38237"] = new ItemDrop("skin_0",50,50)
 lobby._itemDropList["15334"] = new ItemDrop("skin_1",120,70)
+lobby._itemDropList["83274"] = new ItemDrop("gun_0",200,150)
 
 ///
 

@@ -19,6 +19,7 @@ class Item {
 			"skin_1" : new Item("skin_1","Magenta Skin","skin",function(p){
 				p.color = '#8B008B';
 			}),
+			"gun_0" : new Item("gun_0","Assault Rifle","gun",Item.gunEquip)
 
 
 
@@ -27,6 +28,15 @@ class Item {
 
 
 
+		}
+	}
+
+	static gunEquip(p) {
+		if (p.weapon == null){
+			p.weapon = "gun_0"
+			if (p.animator != null){
+				p.animator.onWeaponChanged(p.weapon)
+			}
 		}
 	}
 }

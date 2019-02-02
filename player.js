@@ -18,6 +18,8 @@ class Player {
         this._color = '#FFCD94' //same color as default skin
         this.velocity = {'x':0,'y':0}
         this._health = 100;
+        this._weapon = null; // the weapon currently out, for rendering and shooting purposes.
+                             // should be null for fists or the item prefab id for a gun
 
         //state related vars 
         this._state = Player.state.free
@@ -62,6 +64,11 @@ class Player {
             console.log("ERROR - enum assigned to nonexistent value")
         }
     }
+    get weapon(){return this._weapon}
+    set weapon(val){
+        this.delta.weapon = true
+        this._weapon = val
+    }
 
     //static vars
     static get speed() {return 3}
@@ -103,9 +110,7 @@ class Player {
         })
 
         socket.on('requestPickupDropItem', function(itemDropID){
-            console.log(itemDropID)
             var item = player.lobby.getItemDrop(itemDropID)
-            console.log(item)
             var sqrDist = Util.sqrDist(player,item)
 
             if (item == undefined || item == null || sqrDist > Player.reachDistance * Player.reachDistance){
@@ -119,7 +124,12 @@ class Player {
 
         socket.on('clientRequestingAttack',function(){
             //player hit the fire button
-            //for now, assume no weapon...so we punch
+            //only punch if we dont have a weapon out...
+            if(player.weapon != null){
+                //we should shoot instead.
+                //for now, do nothing
+                return
+            }
 
             //lets calculate a hitbox.... shit this is gonna be a lot of math...
             // https://stackoverflow.com/a/2945439/4283285 is gonna be our approach
@@ -185,6 +195,18 @@ class Player {
                 player.stateTimer = player.punchTime
             }
         })
+        socket.on("changeWeapons", function(data){
+            //data is the name of the weapon we switched to
+            //first check we actaully have it
+            if (player.inventory.gun.id != data && data != null){ //&& !player.inventory['gun'].includes(data)){
+                //we dont have that weapon... i smell a cheater
+                return
+            }
+            //we are switching to a weapon we have..so lets change
+            console.log(data)
+            player.weapon = data
+        })
+
         socket.on('clientMovementKeyChange', function(data) {
            // data is a dictionary of keycodes
            // we need to conver that into a direction
@@ -292,14 +314,15 @@ class Player {
         var itemDrop = this.lobby.getItemDrop(id)
         var item = itemDrop.getPrefab()
         var spot = item.equipSpot
-        console.log(item)
         if(this.inventory[spot] != null && this.inventory[spot] != undefined  ){
             //we already have one of these... drop the old one!
             this.dropItem(spot)
         }
         this.lobby.removeDropItemViaID(id)
         this.inventory[spot] = item
-        item.onEquip(this)
+        if (item.onEquip != null){
+            item.onEquip(this)
+        }
     }
     
     dropItem(spot){
@@ -315,7 +338,8 @@ class Player {
             color: this.color,
             rotation: this.rotation,
             state: this.state,
-            health: this.health
+            health: this.health, //we really only need this for just our own character...
+            weapon: this.weapon
         }
 
         return fullPack
